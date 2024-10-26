@@ -4,6 +4,7 @@ const {
     REST,
     Routes,
     EmbedBuilder,
+    AttachmentBuilder,
 } = require("discord.js");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -16,6 +17,8 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
+const UPDATE_CHANNEL_ID = process.env.UPDATE_CHANNEL_ID;
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -23,6 +26,26 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
     ],
 });
+
+async function sendCharacterJSON(action, characterName) {
+    try {
+        const channel = await client.channels.fetch(UPDATE_CHANNEL_ID);
+        if (!channel) {
+            console.error("Could not find the update channel");
+            return;
+        }
+
+        const fileBuffer = fs.readFileSync("public/characters.json");
+        const attachment = new AttachmentBuilder(fileBuffer, { name: 'characters.json' });
+        
+        await channel.send({
+            content: `Characters database updated - ${action}: ${characterName}`,
+            files: [attachment]
+        });
+    } catch (error) {
+        console.error("Error sending characters update:", error);
+    }
+}
 
 const loadCharacters = () => {
     try {
@@ -258,6 +281,7 @@ client.on("interactionCreate", async (interaction) => {
 
         saveCharacters(characters);
         sendUpdate({ action: "create", name, faceclaim, image, bio });
+        await sendCharacterJSON("Created", name);
         await interaction.reply(`Character **${name}** created!`);
     } else if (commandName === "delete_character") {
         const name = interaction.options.getString("name");
@@ -270,6 +294,7 @@ client.on("interactionCreate", async (interaction) => {
                 characters.splice(characterIndex, 1);
                 saveCharacters(characters);
                 sendUpdate({ action: "delete", name });
+                await sendCharacterJSON("Deleted", name);
                 await interaction.reply(`Character **${name}** deleted!`);
             } else {
                 await interaction.reply(
@@ -305,6 +330,7 @@ client.on("interactionCreate", async (interaction) => {
                 }
                 saveCharacters(characters);
                 sendUpdate({ action: "edit", name });
+                await sendCharacterJSON("Edited", name);
                 await interaction.reply(`Character **${name}** edited!`);
             } else {
                 await interaction.reply(
@@ -340,7 +366,7 @@ client.on("interactionCreate", async (interaction) => {
             return await interaction.reply("No characters found.");
         }
 
-        const characterListURL = "https://yourwebsite.com/characters";  // Replace with the actual URL
+        const characterListURL = "https://shield-database.onrender.com/";
 
         await interaction.reply(`Click [here](${characterListURL}) to view the character list`);
     }
