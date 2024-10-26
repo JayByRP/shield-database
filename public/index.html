@@ -29,19 +29,19 @@
               const surname = nameParts.slice(1).join(" ");
 
               return `
-          <a href="/">
-            <div class="grid-item">
-              <div class="name">
-                <div class="firstname">${firstName.toUpperCase()}</div>
-                <div class="surname">${surname.toUpperCase()}</div>
-              </div>
-              <img src="${character.image}">
-              <div class="info">
-                ${character.faceclaim}<br>
-              </div>
-            </div>
-          </a>
-        `;
+                <a href="${character.bio}"> <!-- Update this line -->
+                  <div class="grid-item">
+                    <div class="name">
+                      <div class="firstname">${firstName.toUpperCase()}</div>
+                      <div class="surname">${surname.toUpperCase()}</div>
+                    </div>
+                    <img src="${character.image}" alt="${character.name}"> <!-- Added alt attribute -->
+                    <div class="info">
+                      ${character.faceclaim}<br>
+                    </div>
+                  </div>
+                </a>
+              `;
             })
             .join("");
 
