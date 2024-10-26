@@ -359,5 +359,5 @@ server.on("upgrade", (request, socket, head) => {
 client.login(process.env.DISCORD_TOKEN);
 
 app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/public/library.html");
+    res.sendFile(__dirname + "/public/index.html");
 });
